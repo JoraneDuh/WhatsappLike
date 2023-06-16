@@ -21,7 +21,8 @@
 </div>
 <div class="container">
     <h1>Discussion</h1>
-    <button class="btn btn-warning" onclick="afficherFormulaire()">Ajouter une relation</button>
+    <button class="btn btn-warning" onclick="afficherFormulaire()"><img class="img" src="img/Plus_font.png"
+                                                                        alt="Image bouton +"></button>
 
     <div id="formulaire" style="display: none;">
         <label for="identifiantInput">Identifiant :</label>
@@ -112,7 +113,7 @@
                     // Parcourir les relations et les ajouter à la liste
                     relations.forEach(function (relation) {
                         var nouvelleRelation = document.createElement("li");
-                        nouvelleRelation.textContent = data.relations;
+                        nouvelleRelation.textContent = relation.identite;
 
                         liste.appendChild(nouvelleRelation);
                     });
@@ -128,7 +129,7 @@
     setInterval(function () {
         // Appele la fonction pour afficher la liste des relations au chargement de la page
         afficherListeRelations();
-    }, 1000) //Actualise la liste toute les 1 seconde
+    }, 500) //Actualise la liste toute les 0,5 seconde
 </script>
 </body>
 </html>

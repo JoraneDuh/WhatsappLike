@@ -1,7 +1,9 @@
 .img-fluid {
     width: 80px;
   }
-
+.img {
+    width: 20px;
+}
 .fo {
     background-color: rgb(63, 192, 200);
     max-width: 600px; 
