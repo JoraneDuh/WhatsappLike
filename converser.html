@@ -19,7 +19,7 @@
     <a class="navbar-brand" href="accueil.html"><img class="img rounded-circle mt-2" src="img/Logo_WAL.png"
                                                      alt="Logo"></a>
 </div>
-<div class="container">
+<div class="container bg-transparent">
     <h1>Discussion</h1>
     <div class="formulaire" id="formulaire">
         <p>Ajouter une relation :</p>
@@ -44,7 +44,14 @@
             <p>Conversation :</p>
             <div class="zone-message" id="afficheMessage">
             </div>
-            <div id="envoieMessage"></div>
+            <form class="row g-0 envoieMessage">
+                <div class="col-10" id="ecrireMessage">
+                    <textarea placeholder="Écrire un message..." id="messageAEnvoie"></textarea>
+                </div>
+                <div class="col-auto">
+                    <button class="btn btn-success" type="submit" id="btnEnvoie"><img class="img-fluid rounded-circle mt-1" src="img/Envoie.png" alt="Envoie de message"></button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
@@ -52,18 +59,78 @@
     const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
     const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
 
+    const textarea = document.querySelector("textarea");
+    textarea.addEventListener("keyup", e=>{
+        textarea.style.height = "63px";
+        let scrolHeight = e.target.scrollHeight;
+        textarea.style.height = `${scrolHeight}px`;
+    })
+
+    // Récupérer les éléments du formulaire
+    var messageTextarea = document.getElementById("messageAEnvoie");
+    var btnEnvoie = document.getElementById("btnEnvoie");
+
+    // Ajouter un gestionnaire d'événement pour l'envoi du message
+    btnEnvoie.addEventListener("click", function(event) {
+        event.preventDefault(); // Empêcher le rechargement de la page
+
+        // Récupérer les valeurs des champs
+        var identifiant = obtenirParametreUrl("identifiant");
+        var relation = obtenirParametreUrl("relation");
+        var message = messageTextarea.value;
+
+        // Vérifier si les valeurs sont présentes
+        if (identifiant && relation && message) {
+            // Construire l'URL de l'API avec les paramètres
+            var apiURL = "https://trankillprojets.fr/wal/wal.php?ecrire&identifiant=" + identifiant + "&relation=" + relation + "&message=" + encodeURIComponent(message);
+
+            // Effectuer la requête HTTP pour envoyer le message
+            fetch(apiURL)
+                .then(function(response) {
+                    return response.json();
+                })
+                .then(function(data) {
+                    if (data.etat.reponse === 1) {
+                        // Message envoyé avec succès
+                        alert("Message envoyé avec succès !");
+                        // Effacer le contenu du champ de message
+                        messageTextarea.value = "";
+                    } else {
+                        // Afficher un message d'erreur
+                        alert("Erreur lors de l'envoi du message : " + data.etat.message);
+                    }
+                })
+                .catch(function(error) {
+                    console.error("Une erreur s'est produite lors de la requête : " + error);
+                });
+        } else {
+            // Afficher un message d'erreur si des champs sont manquants
+            alert("Attention le contenu du message est vide !");
+        }
+    });
+
     // Fonction pour récupérer la valeur d'un paramètre dans l'URL
     function obtenirParametreUrl(nomParametre) {
         var parametres = new URLSearchParams(window.location.search);
         return parametres.get(nomParametre);
     }
 
-    // Fonction pour afficher le formulaire
+    // Variable pour suivre l'état d'affichage du formulaire
+    var formulaireVisible = false;
+
+    // Fonction pour afficher ou masquer le formulaire
     function afficherFormulaire() {
         var formulaire = document.getElementById("formulaire");
-        formulaire.style.display = "block";
-    }
 
+        // Vérifier l'état actuel du formulaire
+        if (formulaireVisible) {
+            formulaire.style.display = "none";
+            formulaireVisible = false;
+        } else {
+            formulaire.style.display = "block";
+            formulaireVisible = true;
+        }
+    }
     // Fonction pour ajouter une relation
     function ajouterRelation() {
         var identifiant = document.getElementById("identifiantInput").value;
@@ -164,17 +231,11 @@
                                                 messageOut.appendChild(messageInput);
                                             }
                                         } else {
-                                            var messageInt = document.getElementById("envoieMessage");
+                                            var messageInt = document.getElementById("afficheMessage");
                                             // Aucun message trouvé, afficher une zone de texte pour écrire un message
-                                            var messageInput = document.createElement("textarea");
-                                            messageInput.setAttribute("placeholder", "Écrire un message...");
-                                            messageInput.classList.add()
+                                            var messageInput = document.createElement("p");
+                                            messageInput.textContent = "Envoyer des messages à vos amis.";
                                             messageOut.appendChild(messageInput);
-
-                                            var boutonEnvoyez = document.createElement("button")
-                                            boutonEnvoyez.textContent = "Envoyez";
-                                            boutonEnvoyez.classList.add("btn", "btn-outline-success")
-                                            messageOut.appendChild(boutonEnvoyez);
                                         }
                                     } else {
                                         console.error("Erreur lors de la récupération des messages : " + data.etat.message);

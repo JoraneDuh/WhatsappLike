@@ -1,9 +1,11 @@
 .img {
     width: 80px;
-  }
+}
+
 .img-fluid {
     width: 20px;
 }
+
 .fo {
     background-color: rgb(63, 192, 200);
     max-width: 600px; 
@@ -14,12 +16,14 @@
 }
 
 .message {
-    background-color: brown
+    background-color: brown;
+    margin-bottom: 10%;
 }
 
 p {
     text-align: center;
 }
+
 .relation {
     margin-bottom: 20px;
     padding: 10px;
@@ -29,14 +33,17 @@ p {
 .hidden, .formulaire {
     display: none;
 }
+
 .zone-message {
     width: 95%;
     height: 800px;
     background-color: white;
-    border-radius: 5%;
+    border-radius: 2%;
+    border-color: gray;
+    margin-bottom: 10px;
 }
 
-textarea {
+.envoieMessage textarea {
     width: 80%;
     height: 59px;
     padding: 15px;
@@ -45,10 +52,21 @@ textarea {
     resize: none;
     font-size: 16px;
     margin-bottom: 20px;
-    margin-top: 20px;
+    margin-top: 18px;
     border-color: #bfbfbf;
+    max-height: 130px;
 }
 
 textarea:is(:focus, :valid){
-border-color: #4671EA;
+    border-color: #4671EA;
+    padding: 14px;
+    border-width: 2px;
+}
+
+textarea::-webkit-scrollbar{
+    width: 0;
+}
+
+.envoieMessage button {
+    margin-top: 23px;
 }
