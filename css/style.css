@@ -1,10 +1,54 @@
-.img-fluid {
+.img {
     width: 80px;
   }
-.img {
+.img-fluid {
     width: 20px;
 }
 .fo {
     background-color: rgb(63, 192, 200);
     max-width: 600px; 
+}
+
+.liste  {
+    background-color: aqua
+}
+
+.message {
+    background-color: brown
+}
+
+p {
+    text-align: center;
+}
+.relation {
+    margin-bottom: 20px;
+    padding: 10px;
+    border: 1px solid #ccc;
+}
+
+.hidden, .formulaire {
+    display: none;
+}
+.zone-message {
+    width: 95%;
+    height: 800px;
+    background-color: white;
+    border-radius: 5%;
+}
+
+textarea {
+    width: 80%;
+    height: 59px;
+    padding: 15px;
+    border-radius: 5px;
+    outline: none;
+    resize: none;
+    font-size: 16px;
+    margin-bottom: 20px;
+    margin-top: 20px;
+    border-color: #bfbfbf;
+}
+
+textarea:is(:focus, :valid){
+border-color: #4671EA;
 }

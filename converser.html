@@ -16,34 +16,42 @@
 </head>
 <body>
 <div class="container-fluid">
-    <a class="navbar-brand" href="accueil.html"><img class="img-fluid rounded-circle mt-2" src="img/Logo_WAL.png"
+    <a class="navbar-brand" href="accueil.html"><img class="img rounded-circle mt-2" src="img/Logo_WAL.png"
                                                      alt="Logo"></a>
 </div>
 <div class="container">
     <h1>Discussion</h1>
-    <button class="btn btn-warning" onclick="afficherFormulaire()"><img class="img" src="img/Plus_font.png"
-                                                                        alt="Image bouton +"></button>
-
-    <div id="formulaire" style="display: none;">
+    <div class="formulaire" id="formulaire">
+        <p>Ajouter une relation :</p>
         <label for="identifiantInput">Identifiant :</label>
         <input type="text" id="identifiantInput">
 
         <label for="emailInput">Adresse e-mail :</label>
         <input type="email" id="emailInput">
 
-        <button onclick="ajouterRelation()">Valider</button>
+        <button class="btn btn-outline-warning" onclick="ajouterRelation()">Valider</button>
     </div>
     <div class="row align-items-start">
-        <div class="col-4" style="background-color: aqua">
-            Liste de relation :
-            <ul id="listeRelations"></ul>
+        <div class="liste col-4">
+            <button class="btn btn-outline-warning" data-bs-toggle="tooltip" data-bs-title="Ajouter une relation"
+                    onclick="afficherFormulaire()"><img class="img-fluid" src="img/Plus_font.png"
+                                                        alt="Image bouton +">
+            </button>
+            <p>Liste des relations :</p>
+            <div id="containerRelations"></div>
         </div>
-        <div class="col" style="background-color: brown">
-            Message :
+        <div class="message col">
+            <p>Conversation :</p>
+            <div class="zone-message" id="afficheMessage">
+            </div>
+            <div id="envoieMessage"></div>
         </div>
     </div>
 </div>
 <script>
+    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+    const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
+
     // Fonction pour récupérer la valeur d'un paramètre dans l'URL
     function obtenirParametreUrl(nomParametre) {
         var parametres = new URLSearchParams(window.location.search);
@@ -68,13 +76,8 @@
             })
             .then(function (data) {
                 if (data.etat.reponse === 1) {
-                    var relation = data.etat.message;
-                    var liste = document.getElementById("listeRelations");
-
-                    var nouvelleRelation = document.createElement("li");
-                    nouvelleRelation.textContent = relation;
-
-                    liste.appendChild(nouvelleRelation);
+                    // Actualiser la listea des relations
+                    afficherListeRelations();
                 } else {
                     alert("Erreur lors de l'ajout de la relation : " + data.etat.message);
                 }
@@ -105,20 +108,144 @@
             .then(function (data) {
                 if (data.etat.reponse === 1) {
                     var relations = data.relations;
-                    var liste = document.getElementById("listeRelations");
+                    var container = document.getElementById("containerRelations");
 
-                    // Effacer la liste actuelle des relations
-                    liste.innerHTML = "";
+                    // Effacer le contenu actuel du conteneur des relations
+                    container.innerHTML = "";
 
-                    // Parcourir les relations et les ajouter à la liste
-                    relations.forEach(function (relation) {
-                        var nouvelleRelation = document.createElement("li");
-                        nouvelleRelation.textContent = relation.identite;
+                    // Parcourir les relations et les ajouter au conteneur
+                    for (var i = 0; i < relations.length; i++) {
+                        var relation = relations[i];
 
-                        liste.appendChild(nouvelleRelation);
-                    });
+
+                        var nouvelleRelation = document.createElement("div");
+                        nouvelleRelation.classList.add("relation");
+
+                        // Ajouter un gestionnaire d'événement pour le clic sur la div
+                        nouvelleRelation.addEventListener("click", function () {
+                            // Logique de traitement lors du clic sur la div
+                            var identifiantRelation = relation.relation;
+                            console.log("Div cliquée : " + relation.relation);
+
+                            // Effectuer une requête pour récupérer les messages associés à la relation
+                            var apiURLMessages = "https://trankillprojets.fr/wal/wal.php?lire&identifiant=" + identifiant + "&relation=" + identifiantRelation;
+
+                            fetch(apiURLMessages)
+                                .then(function (response) {
+                                    return response.json();
+                                })
+                                .then(function (data) {
+                                    if (data.etat.reponse === 1) {
+                                        var messages = data.messages;
+                                        var messageOut = document.getElementById("afficheMessage");
+
+                                        // Effacer le contenu actuel de la conversation
+                                        messageOut.innerHTML = "";
+
+                                        // Vérifier s'il y a des messages
+                                        if (messages.length > 0) {
+                                            // Parcourir les messages et les ajouter à la conversation
+                                            for (var j = 0; j < messages.length; j++) {
+                                                var message = messages[j];
+
+                                                var identiteMessage = document.createElement("p");
+                                                identiteMessage.textContent = "Identité: " + message.identite;
+                                                messageOut.appendChild(identiteMessage);
+
+                                                var contenuMessage = document.createElement("p");
+                                                contenuMessage.textContent = "Message: " + message.message;
+                                                messageOut.appendChild(contenuMessage);
+
+                                                var messageInt = document.getElementById("envoieMessage");
+                                                // Aucun message trouvé, afficher une zone de texte pour écrire un message
+                                                var messageInput = document.createElement("textarea");
+                                                messageInput.setAttribute("placeholder", "Écrire un message...");
+                                                messageInput.classList.add()
+                                                messageOut.appendChild(messageInput);
+                                            }
+                                        } else {
+                                            var messageInt = document.getElementById("envoieMessage");
+                                            // Aucun message trouvé, afficher une zone de texte pour écrire un message
+                                            var messageInput = document.createElement("textarea");
+                                            messageInput.setAttribute("placeholder", "Écrire un message...");
+                                            messageInput.classList.add()
+                                            messageOut.appendChild(messageInput);
+
+                                            var boutonEnvoyez = document.createElement("button")
+                                            boutonEnvoyez.textContent = "Envoyez";
+                                            boutonEnvoyez.classList.add("btn", "btn-outline-success")
+                                            messageOut.appendChild(boutonEnvoyez);
+                                        }
+                                    } else {
+                                        console.error("Erreur lors de la récupération des messages : " + data.etat.message);
+                                    }
+                                })
+                                .catch(function (error) {
+                                    console.error("Une erreur s'est produite lors de la requête : " + error);
+                                });
+                        });
+
+                        // Ajouter un gestionnaire d'événement pour le survol de la div
+                        nouvelleRelation.addEventListener("mouseenter", function () {
+                            boutonSupprimer.classList.remove("hidden");
+                        });
+
+                        // Ajouter un gestionnaire d'événement pour quitter la div
+                        nouvelleRelation.addEventListener("mouseleave", function () {
+                            boutonSupprimer.classList.add("hidden");
+                        });
+
+                        var relationTitre = document.createElement("p");
+                        relationTitre.textContent = relation.relation;
+                        nouvelleRelation.appendChild(relationTitre);
+
+                        var identiteParagraphe = document.createElement("h3");
+                        identiteParagraphe.textContent = relation.identite;
+                        nouvelleRelation.appendChild(identiteParagraphe);
+
+                        // Créer le bouton supprimer
+                        var boutonSupprimer = document.createElement("button");
+                        boutonSupprimer.textContent = "Supprimer";
+                        boutonSupprimer.classList.add("hidden", "btn", "btn-outline-danger");
+
+                        boutonSupprimer.addEventListener("click", function () {
+                            var identifiant = obtenirParametreUrl("identifiant");
+
+                            // Logique de suppression ici
+                            supprimerRelation(identifiant, relation.relation);
+                            console.log("Supprimer la relation : " + relation.relation);
+                        });
+
+                        nouvelleRelation.appendChild(boutonSupprimer);
+
+                        container.appendChild(nouvelleRelation);
+                    }
                 } else {
                     console.error("Erreur lors de la récupération de la liste des relations : " + data.etat.message);
+                }
+            })
+            .catch(function (error) {
+                console.error("Une erreur s'est produite lors de la requête : " + error);
+            });
+    }
+
+    // Fonction pour supprimer une relation
+    function supprimerRelation(identifiant, relation) {
+        var apiURL = "https://trankillprojets.fr/wal/wal.php?delier&identifiant=" + identifiant + "&relation=" + relation;
+
+        fetch(apiURL)
+            .then(function (response) {
+                return response.json();
+            })
+            .then(function (data) {
+                if (data.etat.reponse === 1) {
+                    // Suppression d'association réussie
+                    alert("Suppression association OK");
+                    // Actualiser la liste des relations
+                    afficherListeRelations();
+                } else {
+                    // Afficher le message d'erreur renvoyé par l'API
+                    alert("Erreur lors de la suppression de l'association : " + data.etat.message);
                 }
             })
             .catch(function (error) {
