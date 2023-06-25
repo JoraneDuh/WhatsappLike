@@ -16,23 +16,26 @@
 </head>
 <body>
 <div class="container-fluid">
-    <a class="navbar-brand" href="accueil.html"><img class="img rounded-circle mt-2" src="img/Logo_WAL.png"
-                                                     alt="Logo"></a>
+    <a class="navbar-brand position-absolute top-0 start-0" href="accueil.html"><img class="img rounded-circle mt-2"
+                                                                                     src="img/Logo_WAL.png"
+                                                                                     alt="Logo"></a>
+
+    <button class="btn btn-bg-body position-absolute top-0 end-0" onclick="afficherMenu()"><img class="img rounded-circle"
+                                                                                  src="img/rouage.png"
+                                                                                  alt="Rouage de Option"></button>
 </div>
+
 <div class="container bg-transparent">
-    <h1>Discussion</h1>
+    <h1 id="nomUtilisateur"></h1>
     <div class="formulaire" id="formulaire">
         <p>Ajouter une relation :</p>
-        <label for="identifiantInput">Identifiant :</label>
-        <input type="text" id="identifiantInput">
-
         <label for="emailInput">Adresse e-mail :</label>
-        <input type="email" id="emailInput">
+        <input class="form-control" type="email" id="emailInput">
 
         <button class="btn btn-outline-warning" onclick="ajouterRelation()">Valider</button>
     </div>
     <div class="row align-items-start">
-        <div class="liste col-4">
+        <div class="liste col-5">
             <button class="btn btn-outline-warning" data-bs-toggle="tooltip" data-bs-title="Ajouter une relation"
                     onclick="afficherFormulaire()"><img class="img-fluid" src="img/Plus_font.png"
                                                         alt="Image bouton +">
@@ -45,11 +48,19 @@
             <div class="zone-message" id="afficheMessage">
             </div>
             <form class="row g-0 envoieMessage">
+                <div class="col-1 btn-group">
+                    <button class="btn btn-primary" data-bs-toggle="dropdown" id="emojiButton" aria-expanded="false"><img class="img-fluid" src="img/menuEmoji.png" alt="Menu Emoji"></button>
+                    <ul class="dropdown-menu">
+                        <li>test</li>
+                        <li>test2</li>
+                    </ul>
+                </div>
                 <div class="col-10" id="ecrireMessage">
                     <textarea placeholder="Écrire un message.." id="messageAEnvoie"></textarea>
                 </div>
                 <div class="col-auto">
-                    <button class="btn btn-success" type="submit" id="btnEnvoie"><img class="img-fluid rounded-circle mt-1" src="img/Envoie.png" alt="Envoie de message"></button>
+                    <button class="btn btn-success" type="submit" id="btnEnvoie"><img
+                            class="img-fluid rounded-circle mt-1" src="img/Envoie.png" alt="Envoie de message"></button>
                 </div>
             </form>
         </div>
@@ -59,8 +70,33 @@
     const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
     const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
 
+    $(document).ready(function () {
+        // Options pour le menu des emojis
+        var options = {
+            autoHide: false,
+            showPreview: false,
+            showSkinTones: false
+        };
+
+        // Initialiser le menu des emojis avec les options
+        var emojiPicker = new EmojiButton(options);
+
+        // Cibler le conteneur pour afficher le menu des emojis
+        var emojiContainer = document.getElementById('emojiContainer');
+
+        // Cibler le bouton pour ouvrir le menu des emojis
+        var emojiButton = document.getElementById('emojiButton');
+
+        // Gérer l'événement de clic sur le bouton
+        emojiButton.addEventListener('click', function () {
+            // Afficher le menu des emojis au niveau du conteneur
+            emojiPicker.pickerVisible ? emojiPicker.hidePicker() : emojiPicker.showPicker(emojiContainer);
+        });
+    });
+
+    // faire s'adapter le textarea au texte ecrit si le texte est long alors le textarea s'agrandi et inversement avec une taill max et min
     const textarea = document.querySelector("textarea");
-    textarea.addEventListener("keyup", e=>{
+    textarea.addEventListener("keyup", e => {
         textarea.style.height = "63px";
         let scrolHeight = e.target.scrollHeight;
         textarea.style.height = `${scrolHeight}px`;
@@ -71,7 +107,7 @@
     var btnEnvoie = document.getElementById("btnEnvoie");
 
     // Ajouter un gestionnaire d'événement pour l'envoi du message
-    btnEnvoie.addEventListener("click", function(event) {
+    btnEnvoie.addEventListener("click", function (event) {
         event.preventDefault(); // Empêcher le rechargement de la page
 
         // Récupérer les valeurs des champs
@@ -86,10 +122,10 @@
 
             // Effectuer la requête HTTP pour envoyer le message
             fetch(apiURL)
-                .then(function(response) {
+                .then(function (response) {
                     return response.json();
                 })
-                .then(function(data) {
+                .then(function (data) {
                     if (data.etat.reponse === 1) {
                         // Message envoyé avec succès
                         alert("Message envoyé avec succès !");
@@ -100,7 +136,7 @@
                         alert("Erreur lors de l'envoi du message : " + data.etat.message);
                     }
                 })
-                .catch(function(error) {
+                .catch(function (error) {
                     console.error("Une erreur s'est produite lors de la requête : " + error);
                 });
         } else {
@@ -118,6 +154,42 @@
     // Variable pour suivre l'état d'affichage du formulaire
     var formulaireVisible = false;
 
+    function afficherMenu() {
+
+        var identifiant = obtenirParametreUrl("identifiant");
+        // Effectuer une requête AJAX vers l'API
+        $.ajax({
+            url: 'https://trankillprojets.fr/wal/wal.php?information&identifiant=' + identifiant,
+            type: 'GET',
+            dataType: 'json',
+            success: function(response) {
+                // Vérifier si la réponse de l'API est valide
+                if (response && response.etat && response.etat.reponse === 1) {
+                    var identite = response.identite;
+                    var identifiant = response.identifiant;
+                    var mail = response.mail;
+
+                    // Construire le contenu du menu déroulant avec les données de l'API
+                    var contenuMenu = '<li>Identité : ' + identite + '</li>';
+                    contenuMenu += '<li>Identifiant : ' + identifiant + '</li>';
+                    contenuMenu += '<li>Mail : ' + mail + '</li>';
+
+                    // Afficher le menu déroulant avec les données de l'API
+                    $('#listeDonnees').html(contenuMenu);
+                    $('#menuDeroulant').show();
+                } else {
+                    // Gérer le cas où la réponse de l'API est invalide
+                    console.log('Erreur : Réponse de l\'API invalide');
+                }
+            },
+            error: function() {
+                // Gérer les erreurs de requête AJAX
+                console.log('Erreur : Échec de la requête AJAX');
+            }
+        });
+    }
+
+
     // Fonction pour afficher ou masquer le formulaire
     function afficherFormulaire() {
         var formulaire = document.getElementById("formulaire");
@@ -131,9 +203,10 @@
             formulaireVisible = true;
         }
     }
+
     // Fonction pour ajouter une relation
     function ajouterRelation() {
-        var identifiant = document.getElementById("identifiantInput").value;
+        var identifiant = obtenirParametreUrl("identifiant");
         var email = document.getElementById("emailInput").value;
         var apiURL = "https://trankillprojets.fr/wal/wal.php?lier&identifiant=" + identifiant + "&mail=" + email;
 
@@ -224,11 +297,6 @@
                                                 messageOut.appendChild(contenuMessage);
 
                                                 var messageInt = document.getElementById("envoieMessage");
-                                                // Aucun message trouvé, afficher une zone de texte pour écrire un message
-                                                var messageInput = document.createElement("textarea");
-                                                messageInput.setAttribute("placeholder", "Écrire un message...");
-                                                messageInput.classList.add()
-                                                messageOut.appendChild(messageInput);
                                             }
                                         } else {
                                             var messageInt = document.getElementById("afficheMessage");
